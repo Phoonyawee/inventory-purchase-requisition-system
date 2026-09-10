@@ -1,0 +1,30 @@
+@page
+@model PurchaseRequestsModel
+@using StockPilot.Models
+@{ ViewData["Title"] = "Purchase Requests"; }
+
+<div class="page-heading"><div><span class="eyebrow">PROCUREMENT WORKFLOW</span><h1>Purchase requests</h1></div></div>
+@if (TempData["Message"] is string message) { <div class="alert alert-success">@message</div> }
+
+<details class="panel form-panel"><summary class="btn btn-primary">New request</summary><h2>Request stock replenishment</h2>
+    <form method="post" asp-page-handler="Create"><div asp-validation-summary="ModelOnly" class="text-danger"></div><div class="form-grid">
+        <div class="wide"><label asp-for="Input.ItemId">Item</label><select asp-for="Input.ItemId" class="form-select">@foreach (var item in Model.Items) { <option value="@item.Id">@item.Sku — @item.Name (on hand: @item.StockQuantity)</option> }</select></div>
+        <div><label asp-for="Input.Quantity"></label><input asp-for="Input.Quantity" class="form-control" /><span asp-validation-for="Input.Quantity" class="text-danger"></span></div>
+        <div><label asp-for="Input.Department"></label><input asp-for="Input.Department" class="form-control" /><span asp-validation-for="Input.Department" class="text-danger"></span></div>
+        <div class="wide"><label asp-for="Input.Reason"></label><textarea asp-for="Input.Reason" class="form-control" rows="3"></textarea><span asp-validation-for="Input.Reason" class="text-danger"></span></div>
+    </div><button class="btn btn-primary mt-3">Submit request</button></form>
+</details>
+
+<section class="panel"><div class="table-responsive"><table class="table"><thead><tr><th>Request</th><th>Requester</th><th>Department</th><th>Quantity</th><th>Status</th><th>Action</th></tr></thead><tbody>
+@foreach (var request in Model.Requests)
+{
+    <tr><td><strong>#@request.Id @request.Item.Name</strong><small>@request.Reason</small></td><td>@request.RequestedByName</td><td>@request.Department</td><td>@request.Quantity @request.Item.Unit</td><td><span class="status">@request.Status</span></td><td>
+        @if (request.Status == PurchaseRequestStatus.Pending && Model.CanDecide)
+        { <form method="post" asp-page-handler="Move" class="inline-form"><input type="hidden" name="id" value="@request.Id" /><button name="next" value="Approved" class="btn btn-sm btn-outline-primary">Approve</button><button name="next" value="Rejected" class="btn btn-sm btn-outline-danger">Reject</button></form> }
+        else if (request.Status == PurchaseRequestStatus.Approved && Model.CanProcure)
+        { <form method="post" asp-page-handler="Move"><input type="hidden" name="id" value="@request.Id" /><button name="next" value="Ordered" class="btn btn-sm btn-outline-primary">Mark ordered</button></form> }
+        else if (request.Status == PurchaseRequestStatus.Ordered && Model.CanProcure)
+        { <form method="post" asp-page-handler="Move"><input type="hidden" name="id" value="@request.Id" /><button name="next" value="Received" class="btn btn-sm btn-outline-primary">Receive stock</button></form> }
+    </td></tr>
+}
+</tbody></table></div></section>

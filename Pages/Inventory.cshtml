@@ -1,0 +1,41 @@
+@page
+@model InventoryModel
+@using StockPilot.Models
+@{ ViewData["Title"] = "Inventory"; }
+
+<div class="page-heading"><div><span class="eyebrow">STOCK CONTROL</span><h1>Inventory</h1></div></div>
+@if (TempData["Message"] is string message) { <div class="alert alert-success">@message</div> }
+
+@if (Model.CanManage)
+{
+    <div class="action-grid">
+        <details class="panel form-panel"><summary class="btn btn-primary">Add item</summary><h2>Create item master</h2>
+            <form method="post" asp-page-handler="AddItem"><div asp-validation-summary="ModelOnly" class="text-danger"></div><div class="form-grid">
+                <div><label asp-for="NewItem.Sku"></label><input asp-for="NewItem.Sku" class="form-control" /><span asp-validation-for="NewItem.Sku" class="text-danger"></span></div>
+                <div><label asp-for="NewItem.Name"></label><input asp-for="NewItem.Name" class="form-control" /><span asp-validation-for="NewItem.Name" class="text-danger"></span></div>
+                <div><label asp-for="NewItem.Category"></label><input asp-for="NewItem.Category" class="form-control" /></div>
+                <div><label asp-for="NewItem.Unit"></label><input asp-for="NewItem.Unit" class="form-control" /></div>
+                <div><label asp-for="NewItem.ReorderLevel"></label><input asp-for="NewItem.ReorderLevel" class="form-control" /></div>
+                <div><label asp-for="NewItem.UnitCost"></label><input asp-for="NewItem.UnitCost" class="form-control" /></div>
+            </div><button class="btn btn-primary mt-3">Save item</button></form>
+        </details>
+        <details class="panel form-panel"><summary class="btn btn-primary">Stock movement</summary><h2>Receive or issue stock</h2>
+            <form method="post" asp-page-handler="Move"><div asp-validation-summary="ModelOnly" class="text-danger"></div><div class="form-grid">
+                <div class="wide"><label asp-for="Movement.ItemId">Item</label><select asp-for="Movement.ItemId" class="form-select">@foreach (var item in Model.Items) { <option value="@item.Id">@item.Sku — @item.Name</option> }</select></div>
+                <div><label asp-for="Movement.Type"></label><select asp-for="Movement.Type" asp-items="Html.GetEnumSelectList<StockMovementType>()" class="form-select"></select></div>
+                <div><label asp-for="Movement.Quantity"></label><input asp-for="Movement.Quantity" class="form-control" /><span asp-validation-for="Movement.Quantity" class="text-danger"></span></div>
+                <div class="wide"><label asp-for="Movement.Note"></label><input asp-for="Movement.Note" class="form-control" /><span asp-validation-for="Movement.Note" class="text-danger"></span></div>
+            </div><button class="btn btn-primary mt-3">Post movement</button></form>
+        </details>
+    </div>
+}
+
+<section class="panel"><div class="table-responsive"><table class="table"><thead><tr><th>Item</th><th>Category</th><th>On hand</th><th>Reorder level</th><th>Unit cost</th><th>Status</th></tr></thead><tbody>
+@foreach (var item in Model.Items)
+{ var low = item.StockQuantity <= item.ReorderLevel; <tr><td><strong>@item.Sku</strong><small>@item.Name</small></td><td>@item.Category</td><td>@item.StockQuantity @item.Unit</td><td>@item.ReorderLevel</td><td>฿@item.UnitCost.ToString("N2")</td><td><span class="status @(low ? "status-warning" : "")">@(low ? "Low stock" : "Healthy")</span></td></tr> }
+</tbody></table></div></section>
+
+<section class="panel"><div class="panel-heading"><h2>Recent stock movements</h2></div><div class="table-responsive"><table class="table"><thead><tr><th>Time (UTC)</th><th>Item</th><th>Type</th><th>Quantity</th><th>Note</th></tr></thead><tbody>
+@foreach (var movement in Model.Movements)
+{ <tr><td>@movement.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td><td>@movement.Item.Sku</td><td>@movement.Type</td><td>@movement.Quantity</td><td>@movement.Note<small>@movement.CreatedBy</small></td></tr> }
+</tbody></table></div></section>

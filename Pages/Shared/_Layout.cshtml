@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · StockPilot</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header><nav class="navbar"><div class="container nav-shell">
+        <a class="navbar-brand" asp-page="/Index"><span>SP</span> StockPilot</a>
+        <ul class="navbar-nav primary-nav"><li><a class="nav-link" asp-page="/Index">Dashboard</a></li>
+        @if (User.Identity?.IsAuthenticated ?? false)
+        {
+            <li><a class="nav-link" asp-page="/Inventory">Inventory</a></li>
+            <li><a class="nav-link" asp-page="/PurchaseRequests">Purchase Requests</a></li>
+            @if (User.IsInRole("Manager") || User.IsInRole("Inventory") || User.IsInRole("Admin"))
+            { <li><a class="nav-link" asp-page="/Audit">Audit</a></li> }
+        }
+        </ul>
+        <partial name="_LoginPartial" />
+    </div></nav></header>
+    <div class="container content-shell"><main role="main">@RenderBody()</main></div>
+    <footer class="footer"><div class="container">StockPilot · Synthetic demo data only · ASP.NET Core, Identity, EF Core, and SQLite</div></footer>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

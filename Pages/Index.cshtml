@@ -1,0 +1,38 @@
+@page
+@model IndexModel
+@{ ViewData["Title"] = "Dashboard"; }
+
+@if (!(User.Identity?.IsAuthenticated ?? false))
+{
+    <section class="hero">
+        <span class="eyebrow">INVENTORY + PROCUREMENT</span>
+        <h1>Turn stock demand into approved purchasing.</h1>
+        <p>StockPilot is a portfolio demo for inventory balances, stock movements, purchase approvals, receiving, and audit history.</p>
+        <a class="btn btn-primary btn-lg" asp-area="Identity" asp-page="/Account/Login">Open the demo</a>
+    </section>
+    <section class="panel demo-panel">
+        <h2>Demo accounts</h2><p>All accounts use password <code>Demo123!</code></p>
+        <div class="table-responsive"><table class="table"><thead><tr><th>Role</th><th>Email</th><th>What to try</th></tr></thead><tbody>
+            <tr><td>Employee</td><td><code>employee@stockpilot.local</code></td><td>Create purchase requests</td></tr>
+            <tr><td>Inventory</td><td><code>inventory@stockpilot.local</code></td><td>Receive and issue stock</td></tr>
+            <tr><td>Manager</td><td><code>manager@stockpilot.local</code></td><td>Approve or reject requests</td></tr>
+            <tr><td>Admin</td><td><code>admin@stockpilot.local</code></td><td>Use every workflow</td></tr>
+        </tbody></table></div>
+    </section>
+}
+else
+{
+    <div class="page-heading"><div><span class="eyebrow">OPERATIONS OVERVIEW</span><h1>Dashboard</h1></div></div>
+    <section class="metric-grid four">
+        <div class="metric"><span>Items</span><strong>@Model.ItemCount</strong></div>
+        <div class="metric"><span>Low stock</span><strong>@Model.LowStockCount</strong></div>
+        <div class="metric"><span>Pending requests</span><strong>@Model.PendingRequests</strong></div>
+        <div class="metric"><span>Inventory value</span><strong>฿@Model.InventoryValue.ToString("N0")</strong></div>
+    </section>
+    <section class="panel"><div class="panel-heading"><h2>Recent purchase requests</h2><a asp-page="/PurchaseRequests">View all</a></div>
+        <div class="table-responsive"><table class="table"><thead><tr><th>Request</th><th>Department</th><th>Quantity</th><th>Status</th></tr></thead><tbody>
+        @foreach (var request in Model.RecentRequests)
+        { <tr><td><strong>#@request.Id @request.Item.Name</strong><small>@request.RequestedByName</small></td><td>@request.Department</td><td>@request.Quantity @request.Item.Unit</td><td><span class="status">@request.Status</span></td></tr> }
+        </tbody></table></div>
+    </section>
+}

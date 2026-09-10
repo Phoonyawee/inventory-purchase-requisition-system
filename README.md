@@ -2,6 +2,8 @@
 
 StockPilot is an inventory and purchase requisition portfolio project. It demonstrates item masters, stock movements, role-based approvals, purchasing workflow, automatic receiving, and an audit trail with synthetic data only.
 
+[Live demo](https://stockpilot-inventory-wm71.onrender.com/)
+
 ![StockPilot home page](docs/screenshots/stockpilot-home.png)
 
 ## Workflow
